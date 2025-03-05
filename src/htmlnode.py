@@ -23,9 +23,25 @@ class LeafNode(HTMLNode):
 
     def to_html(self):
         if self.value == None:
-            raise ValueError
+            raise ValueError("no value assigned")
         elif self.tag == None:
             return self.value
         elif self.props == None:
             return f"<{self.tag}>{self.value}</{self.tag}>"
         return f"<{self.tag}{self.props_to_html()}>{self.value}</{self.tag}>"
+
+class ParentNode(HTMLNode):
+    def __init__(self, tag, children, props=None):
+        super().__init__(tag, None, children, props)
+    
+    def to_html(self):
+        if self.tag == None:
+            raise ValueError("no tag assigned")
+        elif self.children == None:
+            raise ValueError("no children assigned")
+        HTMLString = "<"+self.tag+">"
+        for i in self.children:
+            HTMLString += i.to_html()
+        HTMLString += "</"+self.tag+">"
+        return HTMLString
+
