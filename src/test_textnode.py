@@ -1,6 +1,6 @@
 import unittest
 
-from textnode import TextNode, TextType, text_node_to_html_node
+from textnode import TextNode, TextType, text_node_to_html_node, split_nodes_delimiter
 
 
 class TestTextNode(unittest.TestCase):
@@ -65,6 +65,29 @@ class TestTextNode(unittest.TestCase):
         self.assertEqual(html_node.tag, "a")
         self.assertEqual(html_node.value, "This is a link node")
         self.assertEqual(html_node.props["href"], "imagelink")
+
+    def test_split_nodes(self):
+        node = TextNode("This is text with a `code block` word", TextType.TEXT)
+        new_nodes = split_nodes_delimiter([node], "`", TextType.CODE)
+        self.assertEqual(new_nodes, [TextNode("This is text with a ", TextType.TEXT), TextNode("code block", TextType.CODE), TextNode(" word", TextType.TEXT)])
+
+    def test_split_nodes_edge(self):
+        node = TextNode("**Bold text** starts off this text", TextType.TEXT)
+        new_nodes = split_nodes_delimiter([node], "**", TextType.BOLD)
+        self.assertEqual(new_nodes, [TextNode("", TextType.TEXT), TextNode("Bold text", TextType.BOLD), TextNode(" starts off this text", TextType.TEXT)])
+    
+    def test_split_nodes_no_split(self):
+        node = TextNode("This is text with nothing else", TextType.TEXT)
+        new_nodes = split_nodes_delimiter([node], "`", TextType.CODE)
+        self.assertEqual(new_nodes, [TextNode("This is text with nothing else", TextType.TEXT)])
+    
+    def test_alot_of_split_nodes(self):
+        node1 = TextNode("This is text with nothing else", TextType.TEXT)
+        node2 = TextNode("This is italic text already", TextType.ITALIC)
+        node3 = TextNode("This is text with a _italic_ word", TextType.TEXT)
+        node4 = TextNode("This is text with another _italic_ word", TextType.TEXT)
+        new_nodes = split_nodes_delimiter([node1, node2, node3, node4], "_", TextType.ITALIC)
+        self.assertEqual(new_nodes, [TextNode("This is text with nothing else", TextType.TEXT), TextNode("This is italic text already", TextType.ITALIC), TextNode("This is text with a ", TextType.TEXT), TextNode("italic", TextType.ITALIC), TextNode(" word", TextType.TEXT), TextNode("This is text with another ", TextType.TEXT), TextNode("italic", TextType.ITALIC), TextNode(" word", TextType.TEXT)])
 
 
 
